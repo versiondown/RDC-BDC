@@ -5,18 +5,44 @@
     </template>
     <div class="safeZone">
       <div class="book">
-        <div class="bookInfo"></div>
+        <div class="bookInfo">
+
+          <div class="main">
+            <div class="cover">
+              <img class="img" :src="zdata.bookInfo.coverImgUrl"/>
+            </div>
+
+            <div class="infos">
+              <div class="info">
+                <!--<div class="title">{{zdata.bookInfo.titleChina}} | {{zdata.bookInfo.titleEnglish}}</div>-->
+                <div class="title">{{zdata.bookInfo.titleEnglish}}</div>
+                <div class="author">{{zdata.bookInfo.authorEnglish}}</div>
+                <div class="author">{{zdata.bookInfo.press}}</div>
+                <div class="isbn">{{zdata.bookInfo.isbn}}</div>
+                <div class="isbn">{{zdata.bookInfo.progress}}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bar"
+               :style="{'background': `linear-gradient(90deg, bisque, bisque ${Number(zdata.bookInfo.progress.split('/')[0]) / Number(zdata.bookInfo.progress.split('/')[1]) * 100}%, oldlace ${Number(zdata.bookInfo.progress.split('/')[0]) / Number(zdata.bookInfo.progress.split('/')[1]) * 100 + 0.1}%, oldlace)`}"></div>
+
+        </div>
         <div class="bookNote"></div>
       </div>
       <div class="side">
         <div class="ads">
-          <el-button type="primary" @click="loadBookList">S</el-button>
+          <div class="ad">
+
+            <el-button type="primary" @click="loadBookList">S</el-button>
+          </div>
         </div>
         <div class="list">
           <div
             class="book"
             v-for="(book, index) in zlist.bookList"
             :key="index"
+            @click="bookListClick(book.id)"
           >
             <div class="main">
               <div class="cover">
@@ -30,7 +56,8 @@
                 </div>
               </div>
             </div>
-            <div class="bar" :style="{'background': `linear-gradient(90deg, bisque, bisque ${Number(book.progress.split('/')[0]) / Number(book.progress.split('/')[1]) * 100}%, oldlace ${Number(book.progress.split('/')[0]) / Number(book.progress.split('/')[1]) * 100 + 0.1}%, oldlace)`}">
+            <div class="bar"
+                 :style="{'background': `linear-gradient(90deg, bisque, bisque ${Number(book.progress.split('/')[0]) / Number(book.progress.split('/')[1]) * 100}%, oldlace ${Number(book.progress.split('/')[0]) / Number(book.progress.split('/')[1]) * 100 + 0.1}%, oldlace)`}">
             </div>
           </div>
         </div>
@@ -57,7 +84,7 @@
 </template>
 
 <script>
-  import {getBookList} from '@api/epgs/erds/ris'
+  import {getBookList, getBookInfo} from '@api/epgs/erds/ris'
 
   const zlog = console.log.bind(console)
 
@@ -66,9 +93,24 @@
     data() {
       return {
         zcache: {},
-        zdata: {},
+        zdata: {
+          bookInfo: {
+            "id": 1,
+            "titleChina": "基地",
+            "titleEnglish": "Base",
+            "authorChina": "艾萨克·阿西莫夫",
+            "authorEnglish": "Isaac Asimov",
+            "coverImgUrl": "https://res.cloudinary.com/imgcave/image/upload/v1582859280/Img/Logo/ezhq_Blog_Cover_1_pg11id.png",
+            "isbn": "N/A",
+            "press": "N/A",
+            "timeCreate": 1561382544999,
+            "timeUpdate": 1561384397527,
+            "progress": "160/200",
+            "done": false
+          },
+        },
         zlist: {
-          bookList: []
+          bookList: [],
         },
         ztest: {
           bookList: [
@@ -148,7 +190,23 @@
           .catch(err => {
 
           })
-      }
+      },
+      bookListClick(inId) {
+        zlog(`--->bookListClick: inId = ${inId} | inId.type = ${typeof inId}`)
+        this.loadBookInfo(inId)
+      },
+      loadBookInfo(inId) {
+        getBookInfo(inId)
+          .then(res => {
+            zlog('--->loadBookInfo: res =', res)
+            this.zdata.bookInfo = res.data
+          })
+          .catch(err => {
+          })
+
+      },
+      loadBookNote() {
+      },
     }
   }
 </script>
@@ -159,32 +217,112 @@
   $sideListItemMainHeight: 140px;
   $sideListItemBarHeight: 20px;
   $sideListItemCoverRadius: 4px;
-  $fontSizeNormalLevel1: 14px;
+  $fontSizeNormalLevel1: 10px;
   $fontSizeNormalLevel2: 12px;
-  $fontSizeNormalLevel3: 10px;
+  $fontSizeNormalLevel3: 14px;
+  $fontSizeNormalLevel4: 16px;
+  $fontSizeNormalLevel5: 18px;
   .safeZone {
     /*border: 2px solid darkcyan;*/
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: space-between;
     align-items: flex-start;
   }
 
   .safeZone > .book {
     /*border: 2px solid darkgreen;*/
-    width: 100%;
+    width: 90%;
     height: 100%;
+    padding: 0 0 4px 0;
+    border-radius: $radiusNormal;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    box-shadow: 0 1px 2px 0 grey;
+    overflow: scroll;
   }
 
   .safeZone > .book > .bookInfo {
-    /*border: 2px solid darkgrey;*/
+    /*border: 2px solid dodgerblue;*/
+    background: oldlace;
     width: 100%;
     height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .safeZone > .book > .bookInfo > .main {
+    /*border: 2px solid orange;*/
+    width: 100%;
+    height: 180px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .safeZone > .book > .bookInfo > .main > .cover {
+    /*border: 2px solid lightskyblue;*/
+    width: 40%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .safeZone > .book > .bookInfo > .main > .cover > .img {
+    width: auto;
+    height: 90%;
+  }
+  .safeZone > .book > .bookInfo > .main > .infos {
+    /*border: 2px solid darkred;*/
+    width: 60%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .safeZone > .book > .bookInfo > .main > .infos > .info {
+    /*border: 2px solid hotpink;*/
+    width: 100%;
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+  .safeZone > .book > .bookInfo > .main > .infos > .info > div {
+    /*border: 1px solid green;*/
+    width: auto;
+    margin: 4px 0;
+    color: grey;
+    font-size: 18px;
+  }
+  .safeZone > .book > .bookInfo > .main > .infos > .info > .title {
+    color: black;
+    font-size: 22px;
+    font-weight: bold;
+  }
+  .safeZone > .book > .bookInfo > .bar {
+    /*border: 2px solid darkred;*/
+    width: 100%;
+    height: 20px;
   }
 
   .safeZone > .book > .bookNote {
+    /*border: 2px solid darkorange;*/
+    width: 100%;
+    height: 100%;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
   }
 
   .safeZone > .side {
@@ -192,13 +330,14 @@
     width: $sideWidth;
     height: 100%;
     border-radius: $radiusNormal;
-    padding: 4px 0;
+    margin-left: 4px;
+    padding: 0 0 4px 0;
 
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    overflow: auto;
+    overflow: scroll;
 
     box-shadow: 0 1px 2px 0 grey;
   }
@@ -207,10 +346,24 @@
     /*border: 2px solid darkorange;*/
     width: 100%;
     height: 200px;
+    border-radius: 4px;
+    margin: 0 0 4px 0;
+    background-color: oldlace;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
+  }
+  .safeZone > .side > .ads>.ad {
+    width: 94%;
+    height: 100%;
+    border-radius: 4px;
+    /*background-color: oldlace;*/
+    /*box-shadow: 0 0px 2px 0 grey;*/
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
     align-items: center;
   }
 
@@ -234,10 +387,10 @@
     margin: 4px 4px;
     background-color: oldlace;
     flex-shrink: 0;
-    border-radius: 4px;
+    border-radius: $radiusNormal;
     box-shadow: 0 0px 2px 0 grey;
   }
-  .safeZone > .side > .list > .book:hover{
+  .safeZone > .side > .list > .book:hover {
     transition: all 0.2s;
     box-shadow: 0 2px 4px 0 grey;
   }
@@ -285,7 +438,7 @@
     align-items: flex-start;
     overflow: scroll;
   }
-  .safeZone > .side > .list > .book > .main > .infos > .info>div {
+  .safeZone > .side > .list > .book > .main > .infos > .info > div {
     /*border: 1px solid lightpink;*/
     width: 100%;
     height: 24px;
@@ -302,7 +455,6 @@
     height: $sideListItemBarHeight;
     border-radius: 0 0 $radiusNormal $radiusNormal;
   }
-
 
   a {
     color: rgba(183, 205, 226, 1);
