@@ -1,8 +1,8 @@
 import request from '@/plugin/apiEas'
 
-export function getTodoList () {
+export function getBookList () {
   return request({
-    url: '/api/todo/all',
+    url: '/api/book/all',
     method: 'get',
   })
 }
