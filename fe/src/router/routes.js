@@ -72,6 +72,17 @@ const frameIn = [
         name: 'redirect',
         hidden: true,
         component: _import('system/function/redirect')
+      },
+
+      // TODO: EPGS
+      {
+        path: '/epgs/erds/ris',
+        name: 'epgsErdsRis',
+        component: () => import('@/pages/EPGS/ERDS/RIS'),
+        meta: {
+          auth: true,
+          title: 'RIS'
+        }
       }
     ]
   }
