@@ -1,7 +1,6 @@
 <template>
   <d2-container>
     <template slot="header">
-
     </template>
     <div class="safeZone">
       <div class="book">
@@ -24,17 +23,19 @@
             </div>
           </div>
 
-          <div class="bar"
+          <div v-if="zdata.bookInfo.id !== ''" class="bar"
                :style="{'background': `linear-gradient(90deg, bisque, bisque ${Number(zdata.bookInfo.progress.split('/')[0]) / Number(zdata.bookInfo.progress.split('/')[1]) * 100}%, oldlace ${Number(zdata.bookInfo.progress.split('/')[0]) / Number(zdata.bookInfo.progress.split('/')[1]) * 100 + 0.1}%, oldlace)`}"></div>
-
+          <div v-else class="bar"
+               :style="{'background': `linear-gradient(90deg, bisque, bisque 100%, oldlace 100%, oldlace)`}"></div>
         </div>
         <div class="bookNote"></div>
       </div>
       <div class="side">
         <div class="ads">
           <div class="ad">
-
-            <el-button type="primary" @click="loadBookList">S</el-button>
+            <el-button type="warning" plain @click="loadBookList">R</el-button>
+            <el-button type="warning" plain @click="addBookButtonClick">+</el-button>
+            <el-button type="warning" plain @click="delBookButtonClick">-</el-button>
           </div>
         </div>
         <div class="list">
@@ -63,14 +64,6 @@
         </div>
       </div>
     </div>
-
-    <!--<h1>Hola Alice.</h1>-->
-    <!--<el-progress :text-inside="true" :stroke-width="24" :percentage="45" status="success"></el-progress>-->
-    <!--<el-button-->
-    <!--  type="primary"-->
-    <!--  @click="loadBookList">-->
-    <!--  使用-->
-    <!--</el-button>-->
     <template slot="footer">
       <div class="footer">
         <div class="copyright">
@@ -80,11 +73,50 @@
 
       </div>
     </template>
+
+    <el-dialog
+      title="Add book"
+      :visible.sync="zcache.window.addBook.see"
+      :width="zcache.window.addBook.width"
+      :before-close="addBookCancel">
+      <el-form :label-position="zcache.window.addBook.labelPosition" :model="zdata.addBook">
+        <el-form-item label="Title(Chinese)" :label-width="zcache.window.addBook.labelWidth">
+          <el-input v-model="zdata.addBook.titleChina" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="Title(English)" :label-width="zcache.window.addBook.labelWidth">
+          <el-input v-model="zdata.addBook.titleEnglish" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="Author(Chinese)" :label-width="zcache.window.addBook.labelWidth">
+          <el-input v-model="zdata.addBook.authorChina" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="Author(English)" :label-width="zcache.window.addBook.labelWidth">
+          <el-input v-model="zdata.addBook.authorEnglish" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="CoverUrl" :label-width="zcache.window.addBook.labelWidth">
+          <el-input v-model="zdata.addBook.coverImgUrl" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="ISBN" :label-width="zcache.window.addBook.labelWidth">
+          <el-input v-model="zdata.addBook.isbn" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="Press" :label-width="zcache.window.addBook.labelWidth">
+          <el-input v-model="zdata.addBook.press" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="Pages" :label-width="zcache.window.addBook.labelWidth">
+          <el-input v-model="zdata.addBook.progress" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="addBookCancel">Cancel</el-button>
+        <el-button type="primary" @click="addBookSubmit">Submit</el-button>
+      </span>
+    </el-dialog>
   </d2-container>
 </template>
 
 <script>
-  import {getBookList, getBookInfo} from '@api/epgs/erds/ris'
+  import {getBookList, getBookInfo, addBook, delBook} from '@api/rss/bms/index'
 
   const zlog = console.log.bind(console)
 
@@ -92,86 +124,65 @@
     components: {},
     data() {
       return {
-        zcache: {},
+        zcache: {
+          public: {
+            notify:{
+              position: 'top-right',
+            }
+          },
+          window: {
+            addBook: {
+              see: false,
+              width: '60%',
+              labelPosition: 'auto',
+              labelWidth: '200px',
+            }
+          }
+        },
         zdata: {
           bookInfo: {
-            "id": 1,
-            "titleChina": "基地",
-            "titleEnglish": "Base",
-            "authorChina": "艾萨克·阿西莫夫",
-            "authorEnglish": "Isaac Asimov",
-            "coverImgUrl": "https://res.cloudinary.com/imgcave/image/upload/v1582859280/Img/Logo/ezhq_Blog_Cover_1_pg11id.png",
-            "isbn": "N/A",
-            "press": "N/A",
-            "timeCreate": 1561382544999,
-            "timeUpdate": 1561384397527,
-            "progress": "160/200",
-            "done": false
+            titleEnglish: 'Please chose your book.',
+            authorEnglish: '',
+            coverImgUrl: '',
+            isbn: '',
+            press: '',
+            progress: '0/100',
+            id: '',
+          },
+          bookInfoDefault: {
+            titleEnglish: 'Please chose your book.',
+            authorEnglish: '',
+            coverImgUrl: '',
+            isbn: '',
+            press: '',
+            progress: '0/100',
+            id: '',
+          },
+          addBook: {
+            titleChina: '',
+            titleEnglish: '',
+            authorChina: '',
+            authorEnglish: '',
+            coverImgUrl: 'https://res.cloudinary.com/imgcave/image/upload/v1582859280/Img/Logo/ezhq_Blog_Cover_1_pg11id.png',
+            isbn: '',
+            press: '',
+            progress: '',
+          },
+          addBookDefault: {
+            titleChina: '',
+            titleEnglish: '',
+            authorChina: '',
+            authorEnglish: '',
+            coverImgUrl: 'https://res.cloudinary.com/imgcave/image/upload/v1582859280/Img/Logo/ezhq_Blog_Cover_1_pg11id.png',
+            isbn: '',
+            press: '',
+            progress: '',
           },
         },
         zlist: {
           bookList: [],
         },
-        ztest: {
-          bookList: [
-            {
-              "id": 1,
-              "titleChina": "基地",
-              "titleEnglish": "Base",
-              "authorChina": "艾萨克·阿西莫夫",
-              "authorEnglish": "Isaac Asimov",
-              "coverImgUrl": "https://res.cloudinary.com/imgcave/image/upload/v1582859280/Img/Logo/ezhq_Blog_Cover_1_pg11id.png",
-              "isbn": "N/A",
-              "press": "N/A",
-              "timeCreate": 1561382544999,
-              "timeUpdate": 1561384397527,
-              "progress": "160/200",
-              "done": false
-            },
-            {
-              "id": 2,
-              "titleChina": "基地 2",
-              "titleEnglish": "Base 2",
-              "authorChina": "艾萨克·阿西莫夫",
-              "authorEnglish": "Isaac Asimov",
-              "coverImgUrl": "https://res.cloudinary.com/imgcave/image/upload/v1582859280/Img/Logo/ezhq_Blog_Cover_1_pg11id.png",
-              "isbn": "N/A",
-              "press": "N/A",
-              "timeCreate": 1561382544999,
-              "timeUpdate": 1561384397527,
-              "progress": "120/200",
-              "done": false
-            },
-            {
-              "id": 3,
-              "titleChina": "基地 3",
-              "titleEnglish": "Base 3",
-              "authorChina": "艾萨克·阿西莫夫",
-              "authorEnglish": "Isaac Asimov",
-              "coverImgUrl": "https://res.cloudinary.com/imgcave/image/upload/v1582859280/Img/Logo/ezhq_Blog_Cover_1_pg11id.png",
-              "isbn": "N/A",
-              "press": "N/A",
-              "timeCreate": 1561382544999,
-              "timeUpdate": 1561384397527,
-              "progress": "80/200",
-              "done": false
-            },
-            {
-              "id": 4,
-              "titleChina": "基地 4",
-              "titleEnglish": "Base 4",
-              "authorChina": "艾萨克·阿西莫夫",
-              "authorEnglish": "Isaac Asimov",
-              "coverImgUrl": "https://res.cloudinary.com/imgcave/image/upload/v1582859280/Img/Logo/ezhq_Blog_Cover_1_pg11id.png",
-              "isbn": "N/A",
-              "press": "N/A",
-              "timeCreate": 1561382544999,
-              "timeUpdate": 1561384397527,
-              "progress": "40/200",
-              "done": false
-            }
-          ],
-        }
+        ztest: {}
       }
     },
     mounted() {
@@ -184,26 +195,124 @@
         let postData = {}
         getBookList(postData)
           .then(res => {
-            zlog('--->loadBookList: res: res =', res)
-            this.zlist.bookList = res.data
+            this.loadBookListSuccess(res)
           })
           .catch(err => {
-
+            this.loadBookListFail(err)
           })
       },
+      loadBookListSuccess(inRes) {
+        this.zlist.bookList = inRes.data
+
+        this.$notify.success({
+          title: 'Update',
+          message: 'Success to update book list.',
+          position: this.zcache.public.notify.position,
+          offset: 0,
+          showClose: false
+        });
+      },
+      loadBookListFail(inErr) {
+        this.$notify.error({
+          title: 'Update',
+          message: 'Fail to update book list.',
+          position: this.zcache.public.notify.position,
+          offset: 60,
+          showClose: false
+        });
+      },
       bookListClick(inId) {
-        zlog(`--->bookListClick: inId = ${inId} | inId.type = ${typeof inId}`)
         this.loadBookInfo(inId)
       },
       loadBookInfo(inId) {
         getBookInfo(inId)
           .then(res => {
-            zlog('--->loadBookInfo: res =', res)
             this.zdata.bookInfo = res.data
           })
           .catch(err => {
           })
 
+      },
+      addBookButtonClick() {
+        this.zcache.window.addBook.see = true
+      },
+      addBookSubmit() {
+        let postData = this.zdata.addBook
+
+        addBook(postData)
+          .then(res => {
+            this.addBookSuccess(res)
+          })
+          .catch(err => {
+
+            this.addBookFail(err)
+          })
+      },
+      addBookSuccess(inRes) {
+        this.$notify.success({
+          title: 'Add',
+          message: 'Success to add book info.',
+          position: this.zcache.public.notify.position,
+          offset: 60,
+          showClose: false
+        });
+
+        this.zcache.window.addBook.see = false
+
+        this.zdata.addBook = JSON.parse(JSON.stringify(this.zdata.addBookDefault))
+
+        this.loadBookList()
+      },
+      addBookFail(inErr) {
+      },
+      addBookCancel(done) {
+        this.$confirm('Confirm close window ? Your data will not save.')
+          .then(_ => {
+            this.zcache.window.addBook.see = false
+            this.zdata.addBook = JSON.parse(JSON.stringify(this.zdata.addBookDefault))
+          })
+          .catch(_ => {
+          });
+      },
+      delBookButtonClick() {
+        let deleteBookId = this.zdata.bookInfo.id
+
+        if (deleteBookId === '') {
+          this.delBookCheckFail()
+        } else {
+          delBook(deleteBookId)
+            .then(res => {
+              this.delBookSuccess(res)
+            })
+            .catch(err => {
+              this.delBookFail(err)
+            })
+        }
+
+      },
+      delBookCheckFail() {
+        this.$notify.error({
+          title: 'No Book.',
+          message: 'Please select a book to delete.',
+          position: this.zcache.public.notify.position,
+          offset: 60,
+          showClose: false
+        });
+      },
+      delBookSuccess(inRes) {
+        this.$notify.success({
+          title: 'Deleted',
+          message: 'Success to delete book.',
+          position: this.zcache.public.notify.position,
+          offset: 60,
+          showClose: false
+        });
+
+        this.zdata.bookInfo = JSON.parse(JSON.stringify(this.zdata.bookInfoDefault))
+
+        this.loadBookList()
+      },
+      delBookFail(inErr) {
       },
       loadBookNote() {
       },
@@ -251,6 +360,7 @@
     background: oldlace;
     width: 100%;
     height: 200px;
+    border-radius: $radiusNormal;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -260,6 +370,7 @@
     /*border: 2px solid orange;*/
     width: 100%;
     height: 180px;
+    border-radius: $radiusNormal $radiusNormal 0 0;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
@@ -312,6 +423,7 @@
     /*border: 2px solid darkred;*/
     width: 100%;
     height: 20px;
+    border-radius: 0 0 $radiusNormal $radiusNormal;
   }
 
   .safeZone > .book > .bookNote {
@@ -355,15 +467,15 @@
     justify-content: center;
     align-items: center;
   }
-  .safeZone > .side > .ads>.ad {
+  .safeZone > .side > .ads > .ad {
     width: 94%;
     height: 100%;
     border-radius: 4px;
     /*background-color: oldlace;*/
     /*box-shadow: 0 0px 2px 0 grey;*/
     display: flex;
-    flex-direction: column;
-    justify-content: space-around;
+    flex-direction: row;
+    justify-content: center;
     align-items: center;
   }
 

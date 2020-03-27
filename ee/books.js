@@ -26,6 +26,52 @@ app.use(express.static('static'))
 app.use(cors())
 app.use(bodyParser.json())
 
+// ================ 工作区: 网络通信 ================
+/*
+* TODO: 网络通信
+*   sendHtml: 发送 HTML 内容
+*   sendJSON: 发送 JSON 内容
+*   abort: 发送操作终止信息
+*/
+const sendHtml = (path, res) => {
+    let options = {
+        encoding: 'utf-8',
+    }
+
+    fs.readFile(path, options, (err, data) => {
+        zlog(`--->读取 HTML 文件 ${path} 内容是: `, typeof data)
+        res.send(data)
+    })
+}
+const sendJSON = (data, res) => {
+    let r = JSON.stringify(data, null, 2)
+    res.send(r)
+}
+const abort = (res, code) => {
+    let mapper = {
+        400: 'Bad Request.',
+        404: 'Not Found.',
+    }
+
+    let text = mapper[code]
+    res.status(code).send(text)
+}
+
+// ================ 工作区: 账户管理 ================
+/*
+* TODO: 账户管理
+*   loadBooks: 加载列表
+*   saveBooks: 保存书籍
+*   bookList: 直接调取当前书籍列表
+*   sendHtml: 发送 HTML 内容
+*   sendJSON: 发送 JSON 内容
+*   abort: 发送操作终止信息
+*   bookAdd: 书籍添加
+*   bookEdit: 书籍编辑
+*   bookDelete: 书籍删除
+*   bookFetchById: 根据 id 获取指定书籍信息
+*/
+
 // ================ 工作区: 文件操作 ================
 /*
 * TODO: 文件操作
@@ -50,29 +96,6 @@ const saveBooks = (inBooks) => {
     fs.writeFileSync('books.json', s)
 }
 const bookList = loadBooks()
-const sendHtml = (path, res) => {
-    let options = {
-        encoding: 'utf-8',
-    }
-
-    fs.readFile(path, options, (err, data) => {
-        zlog(`--->读取 HTML 文件 ${path} 内容是: `, typeof data)
-        res.send(data)
-    })
-}
-const sendJSON = (data, res) => {
-    let r = JSON.stringify(data, null, 2)
-    res.send(r)
-}
-const abort = (res, code) => {
-    let mapper = {
-        400: 'Bad Request.',
-        404: 'Not Found.',
-    }
-
-    let text = mapper[code]
-    res.status(code).send(text)
-}
 const bookAdd = (inBook) => {
     if (bookList.length === 0) {
         inBook.id = 1
@@ -109,7 +132,7 @@ const bookEdit = (inId, inBook) => {
     }
 }
 const bookDelete = (inId) => {
-    id = Number(id)
+    id = Number(inId)
     let index = bookList.findIndex(e => e.id === id)
     if ( index > -1) {
         let t = bookList.splice(index, 1)[0]
@@ -147,7 +170,7 @@ app.get('/api/book/all', (req, res) => {
     sendJSON(bookList, res)
 })
 app.post('/api/book/add', (req, res) => {
-    zlog(`===>Network | /api/book/add | req.body`)
+    zlog(`===>Network | /api/book/add | ${JSON.stringify(req.body)}`)
     let inBook = req.body
     let book = bookAdd(inBook)
     sendJSON(book, res)

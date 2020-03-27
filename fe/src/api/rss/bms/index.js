@@ -12,3 +12,16 @@ export function getBookInfo (inId) {
     method: 'get'
   })
 }
+export function addBook (inData) {
+  return request({
+    url: `/api/book/add`,
+    method: 'post',
+    data: inData
+  })
+}
+export function delBook(inId) {
+  return request({
+    url: `/api/book/delete/${inId}`,
+    method: 'get'
+  })
+}
