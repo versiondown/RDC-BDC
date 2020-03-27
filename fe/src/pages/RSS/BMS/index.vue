@@ -146,7 +146,7 @@
             coverImgUrl: '',
             isbn: '',
             press: '',
-            progress: '0/100',
+            progress: '',
             id: '',
           },
           bookInfoDefault: {
@@ -155,7 +155,7 @@
             coverImgUrl: '',
             isbn: '',
             press: '',
-            progress: '0/100',
+            progress: '',
             id: '',
           },
           addBook: {
@@ -227,11 +227,24 @@
       loadBookInfo(inId) {
         getBookInfo(inId)
           .then(res => {
-            this.zdata.bookInfo = res.data
+            this.loadBookInfoSuccess(res)
           })
           .catch(err => {
+            this.loadBookInfoFail(err)
           })
 
+      },
+      loadBookInfoSuccess(inRes){
+        this.zdata.bookInfo = inRes.data
+      },
+      loadBookInfoFail(inErr){
+        this.$notify.error({
+          title: 'Info',
+          message: 'Success to load book info.',
+          position: this.zcache.public.notify.position,
+          offset: 60,
+          showClose: false
+        });
       },
       addBookButtonClick() {
         this.zcache.window.addBook.see = true
@@ -249,14 +262,6 @@
           })
       },
       addBookSuccess(inRes) {
-        this.$notify.success({
-          title: 'Add',
-          message: 'Success to add book info.',
-          position: this.zcache.public.notify.position,
-          offset: 60,
-          showClose: false
-        });
-
         this.zcache.window.addBook.see = false
 
         this.zdata.addBook = JSON.parse(JSON.stringify(this.zdata.addBookDefault))
@@ -264,6 +269,13 @@
         this.loadBookList()
       },
       addBookFail(inErr) {
+        this.$notify.error({
+          title: 'Add Fail.',
+          message: 'Fail to add book.',
+          position: this.zcache.public.notify.position,
+          offset: 60,
+          showClose: false
+        });
       },
       addBookCancel(done) {
         this.$confirm('Confirm close window ? Your data will not save.')
@@ -300,19 +312,18 @@
         });
       },
       delBookSuccess(inRes) {
-        this.$notify.success({
-          title: 'Deleted',
-          message: 'Success to delete book.',
-          position: this.zcache.public.notify.position,
-          offset: 60,
-          showClose: false
-        });
-
         this.zdata.bookInfo = JSON.parse(JSON.stringify(this.zdata.bookInfoDefault))
 
         this.loadBookList()
       },
       delBookFail(inErr) {
+        this.$notify.error({
+          title: 'Del Fail.',
+          message: 'Fail to delete the book.',
+          position: this.zcache.public.notify.position,
+          offset: 60,
+          showClose: false
+        });
       },
       loadBookNote() {
       },
