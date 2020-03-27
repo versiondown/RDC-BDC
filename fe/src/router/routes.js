@@ -74,14 +74,15 @@ const frameIn = [
         component: _import('system/function/redirect')
       },
 
-      // TODO: EPGS
+      // TODO: RSS
+      //  RSS-BMS
       {
-        path: '/epgs/erds/ris',
-        name: 'epgsErdsRis',
-        component: () => import('@/pages/EPGS/ERDS/RIS'),
+        path: '/rss/bms',
+        name: 'RssBmsIndex',
+        component: () => import('@/pages/RSS/BMS/'),
         meta: {
           auth: true,
-          title: 'RIS'
+          title: 'BMS'
         }
       }
     ]
