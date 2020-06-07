@@ -1,10 +1,14 @@
 <template>
   <div class="page-login">
-    <div class="page-login--layer page-login--layer-area">
-      <ul class="circles">
-        <li v-for="n in 10" :key="n"></li>
-      </ul>
-    </div>
+
+    <!--<div class="page-login&#45;&#45;layer page-login&#45;&#45;layer-area">-->
+    <!--  <ul class="circles">-->
+    <!--    <li v-for="n in 10" :key="n"></li>-->
+    <!--  </ul>-->
+    <!--</div>-->
+
+
+
     <div
       class="page-login--layer page-login--layer-time"
       flex="main:center cross:center">
@@ -15,9 +19,9 @@
         class="page-login--content"
         flex="dir:top main:justify cross:stretch box:justify">
         <div class="page-login--content-header">
-          <p class="page-login--content-header-motto">
-            时间是一切财富中最宝贵的财富
-          </p>
+          <!--<p class="page-login&#45;&#45;content-header-motto">-->
+          <!--  时间是一切财富中最宝贵的财富-->
+          <!--</p>-->
         </div>
         <div
           class="page-login--content-main"
@@ -241,9 +245,27 @@ export default {
   @extend %unable-select;
   $backgroundColor: #F0F2F5;
   // ---
-  background-color: $backgroundColor;
+  //background-color: $backgroundColor;
+  /*background-color: lightskyblue;*/
+  /*height: 100%;*/
+  /*position: relative;*/
+  background-image: url("image/zmg_bk.png");
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
-  position: relative;
+  min-width: 1000px;
+  z-index: -10;
+  zoom: 1;
+  background-color: #fff;
+  background-repeat: no-repeat;
+  background-size: cover;
+  -webkit-background-size: cover;
+  -o-background-size: cover;
+  background-position: center 0;
+
+
   // 层
   .page-login--layer {
     @extend %full;
@@ -254,10 +276,17 @@ export default {
   }
   // 时间
   .page-login--layer-time {
-    font-size: 24em;
-    font-weight: bold;
-    color: rgba(0, 0, 0, 0.03);
+    /*font-size: 24em;*/
+    font-size: 12em;
+    /*font-weight: bold;*/
+    font-weight: lighter;
+    /*color: rgba(0, 0, 0, 0.03);*/
+    color: rgba(255, 255, 255, 0.4);
     overflow: hidden;
+    /*border: 2px solid red;*/
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
   }
   // 登陆页面控件的容器
   .page-login--content {
